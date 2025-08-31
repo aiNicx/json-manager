@@ -1,6 +1,6 @@
 // Card rendering and preview generation for JSON Manager
 class Rendering {
-    static renderCards(jsonData, currentPath, searchTerm) {
+    static renderCards(jsonData, currentPath, searchTerm, searchResults = null) {
         const container = document.getElementById('cardsContainer');
         const currentData = Navigation.getCurrentData(jsonData, currentPath);
 
@@ -10,29 +10,47 @@ class Rendering {
         }
 
         const keys = Object.keys(currentData);
-        const filteredKeys = searchTerm ?
-            keys.filter(key => key.toLowerCase().includes(searchTerm)) :
-            keys;
+        let filteredKeys = keys;
+
+        // Apply search filtering
+        if (searchTerm && searchResults) {
+            filteredKeys = keys.filter(key => {
+                const path = [...currentPath, key].join('.');
+                return searchResults.highlights && searchResults.highlights.has(path);
+            });
+        } else if (searchTerm) {
+            // Fallback to simple search
+            filteredKeys = keys.filter(key => key.toLowerCase().includes(searchTerm.toLowerCase()));
+        }
 
         container.innerHTML = '';
 
         filteredKeys.forEach(key => {
             const value = currentData[key];
-            const card = this.createCard(key, value);
+            const card = this.createCard(key, value, currentPath, searchResults);
             container.appendChild(card);
         });
 
         Navigation.updateBreadcrumb(currentPath);
     }
 
-    static createCard(key, value) {
+    static createCard(key, value, currentPath = [], searchResults = null) {
         const card = document.createElement('div');
         card.className = 'card';
         card.dataset.key = key;
 
         const type = Utils.getValueType(value);
         const iconClass = Utils.getTypeIcon(type);
-        const preview = this.generatePreview(value);
+        const preview = this.generatePreview(value, currentPath, key, searchResults);
+
+        // Check if this card matches search
+        const path = [...currentPath, key].join('.');
+        const isSearchMatch = searchResults && searchResults.highlights &&
+            searchResults.highlights.has(path);
+
+        if (isSearchMatch) {
+            card.classList.add('search-match');
+        }
 
         // Generate count badge for objects and arrays
         let countBadge = '';
@@ -44,10 +62,19 @@ class Rendering {
             countBadge = `<span class="card-badge">${count} elem</span>`;
         }
 
+        // Highlight key if it matches search
+        let highlightedKey = key;
+        if (isSearchMatch && searchResults.highlights.get(path)) {
+            const highlight = searchResults.highlights.get(path);
+            if (highlight.key) {
+                highlightedKey = Search.highlightText(key, Search.searchTerm, Search.useRegex ? new RegExp(Search.searchTerm, 'gi') : null);
+            }
+        }
+
         card.innerHTML = `
             <div class="card-header">
                 <div class="card-title-section">
-                    <h3 class="card-title">${key}</h3>
+                    <h3 class="card-title">${highlightedKey}</h3>
                     ${countBadge}
                 </div>
                 <div class="card-icon ${iconClass}">
@@ -90,18 +117,34 @@ class Rendering {
         return card;
     }
 
-    static generatePreview(value) {
+    static generatePreview(value, currentPath = [], key = '', searchResults = null) {
         const type = Utils.getValueType(value);
+        const path = [...currentPath, key].join('.');
 
         if (type === 'object') {
             const keys = Object.keys(value);
             const previewKeys = keys.slice(0, 3);
             let preview = '';
 
-            previewKeys.forEach(key => {
-                const val = value[key];
+            previewKeys.forEach(previewKey => {
+                const val = value[previewKey];
                 const valType = Utils.getValueType(val);
-                preview += `<div class="preview-item">${key}: ${Utils.formatValue(val, true)}</div>`;
+                let formattedValue = Utils.formatValue(val, true);
+
+                // Highlight value if it matches search
+                if (searchResults && searchResults.highlights) {
+                    const valuePath = [...currentPath, key, previewKey].join('.');
+                    const highlight = searchResults.highlights.get(valuePath);
+                    if (highlight && highlight.value) {
+                        formattedValue = Search.highlightText(
+                            String(val),
+                            Search.searchTerm,
+                            Search.useRegex ? new RegExp(Search.searchTerm, 'gi') : null
+                        );
+                    }
+                }
+
+                preview += `<div class="preview-item">${previewKey}: ${formattedValue}</div>`;
             });
 
             if (keys.length > 3) {
@@ -115,7 +158,22 @@ class Rendering {
 
             previewItems.forEach((item, index) => {
                 const itemType = Utils.getValueType(item);
-                preview += `<div class="preview-item">[${index}]: ${Utils.formatValue(item, true)}</div>`;
+                let formattedValue = Utils.formatValue(item, true);
+
+                // Highlight array item if it matches search
+                if (searchResults && searchResults.highlights) {
+                    const itemPath = [...currentPath, key, index.toString()].join('.');
+                    const highlight = searchResults.highlights.get(itemPath);
+                    if (highlight && highlight.value) {
+                        formattedValue = Search.highlightText(
+                            String(item),
+                            Search.searchTerm,
+                            Search.useRegex ? new RegExp(Search.searchTerm, 'gi') : null
+                        );
+                    }
+                }
+
+                preview += `<div class="preview-item">[${index}]: ${formattedValue}</div>`;
             });
 
             if (value.length > 3) {
@@ -124,7 +182,21 @@ class Rendering {
 
             return preview;
         } else {
-            return `<div class="preview-item">${Utils.formatValue(value)}</div>`;
+            let formattedValue = Utils.formatValue(value);
+
+            // Highlight primitive value if it matches search
+            if (searchResults && searchResults.highlights) {
+                const highlight = searchResults.highlights.get(path);
+                if (highlight && highlight.value) {
+                    formattedValue = Search.highlightText(
+                        String(value),
+                        Search.searchTerm,
+                        Search.useRegex ? new RegExp(Search.searchTerm, 'gi') : null
+                    );
+                }
+            }
+
+            return `<div class="preview-item">${formattedValue}</div>`;
         }
     }
 }

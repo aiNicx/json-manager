@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="css/modals.css">
     <link rel="stylesheet" href="css/footer.css">
     <link rel="stylesheet" href="css/utilities.css">
+    <link rel="stylesheet" href="css/viewer.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
 <body>
@@ -64,12 +65,35 @@
 
             <!-- JSON Viewer Section -->
             <section class="viewer-section" id="viewerSection" style="display: none;">
+                <!-- Viewer Controls -->
                 <div class="viewer-controls">
                     <div class="search-box">
                         <i class="fas fa-search"></i>
-                        <input type="text" id="searchInput" placeholder="Cerca nelle categorie...">
+                        <input type="text" id="searchInput" placeholder="Cerca in chiavi e valori...">
+                    </div>
+                    <div class="search-options" id="searchOptions" style="display: none;">
+                        <select id="searchType">
+                            <option value="all">Tutto</option>
+                            <option value="keys">Solo chiavi</option>
+                            <option value="values">Solo valori</option>
+                        </select>
+                        <select id="dataTypeFilter">
+                            <option value="all">Tutti i tipi</option>
+                            <option value="string">Stringhe</option>
+                            <option value="number">Numeri</option>
+                            <option value="boolean">Booleani</option>
+                            <option value="object">Oggetti</option>
+                            <option value="array">Array</option>
+                            <option value="null">Null</option>
+                        </select>
+                        <label>
+                            <input type="checkbox" id="regexSearch"> Regex
+                        </label>
                     </div>
                     <div class="view-options">
+                        <button id="treeViewToggle" class="btn btn-sm">
+                            <i class="fas fa-tree"></i> Albero
+                        </button>
                         <button id="expandAllBtn" class="btn btn-sm">
                             <i class="fas fa-expand"></i> Espandi Tutto
                         </button>
@@ -79,8 +103,26 @@
                     </div>
                 </div>
 
-                <div class="cards-container" id="cardsContainer">
-                    <!-- Cards will be dynamically generated here -->
+                <!-- Main Viewer Container -->
+                <div class="viewer-container">
+                    <!-- Tree View Sidebar -->
+                    <div class="tree-sidebar" id="treeSidebar" style="display: none;">
+                        <div class="tree-header">
+                            <h4><i class="fas fa-tree"></i> Struttura Albero</h4>
+                            <button id="treeMinimizeBtn" class="btn btn-sm">
+                                <i class="fas fa-chevron-left"></i>
+                            </button>
+                        </div>
+                        <div class="tree-content" id="treeContent"></div>
+                    </div>
+
+                    <!-- Main Content Area -->
+                    <div class="viewer-main">
+                        <!-- Cards Container -->
+                        <div class="cards-container" id="cardsContainer">
+                            <!-- Cards will be dynamically generated here -->
+                        </div>
+                    </div>
                 </div>
             </section>
 
@@ -194,6 +236,8 @@
     <script src="js/navigation.js"></script>
     <script src="js/rendering.js"></script>
     <script src="js/modals.js"></script>
+    <script src="js/treeview.js"></script>
+    <script src="js/search.js"></script>
     <script src="js/core.js"></script>
     <script src="js/main.js"></script>
 </body>

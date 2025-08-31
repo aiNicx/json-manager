@@ -36,6 +36,12 @@ class Core {
         window.jsonManager.searchTerm = '';
         document.getElementById('searchInput').value = '';
 
+        // Reset search state
+        Search.searchTerm = '';
+        Search.searchType = 'all';
+        Search.dataTypeFilter = 'all';
+        Search.useRegex = false;
+
         // Switch to viewer
         document.getElementById('loadingSection').style.display = 'none';
         document.getElementById('viewerSection').style.display = 'block';
@@ -43,7 +49,15 @@ class Core {
         document.getElementById('resetBtn').disabled = false;
         document.getElementById('addElementBtn').style.display = 'block';
 
+        // Render cards
         Rendering.renderCards(json, [], '');
+
+        // Initialize tree view if visible
+        if (document.getElementById('treeSidebar').style.display !== 'none') {
+            TreeView.renderTree(json);
+        }
+
+        // Update stats
         Stats.updateStats(json);
         Notifications.showSuccess('JSON caricato con successo!');
     }
@@ -94,13 +108,31 @@ class Core {
     }
 
     static expandAll() {
-        // This would expand all nested objects/arrays - simplified for now
-        Notifications.showSuccess('Funzionalità espandi tutto in sviluppo');
+        // Expand all in tree view if visible
+        if (document.getElementById('treeSidebar').style.display !== 'none') {
+            TreeView.expandAll();
+            Notifications.showSuccess('Albero espanso completamente');
+        } else {
+            Notifications.showSuccess('Funzionalità espandi tutto disponibile nella vista albero');
+        }
     }
 
     static collapseAll() {
         window.jsonManager.currentPath = [];
-        Rendering.renderCards(window.jsonManager.jsonData, [], window.jsonManager.searchTerm);
+
+        // Get current search results for rendering
+        const searchResults = Search.searchTerm ? Search.searchInData(window.jsonManager.jsonData, [], Search.searchTerm) : null;
+        Rendering.renderCards(window.jsonManager.jsonData, [], window.jsonManager.searchTerm, searchResults);
+
+        // Collapse tree view if visible
+        if (document.getElementById('treeSidebar').style.display !== 'none') {
+            TreeView.collapseAll();
+        }
+
+        // Update breadcrumb
+        Navigation.updateBreadcrumb([]);
+
+        Notifications.showSuccess('Vista collassata');
     }
 
     static editValue(key) {

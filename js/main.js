@@ -31,8 +31,8 @@ class JSONManager {
 
         // Search
         document.getElementById('searchInput').addEventListener('input', (e) => {
-            this.searchTerm = e.target.value.toLowerCase();
-            Rendering.renderCards(this.jsonData, this.currentPath, this.searchTerm);
+            this.searchTerm = e.target.value;
+            // Search is now handled by Search class
         });
 
         // View controls
@@ -108,12 +108,26 @@ class JSONManager {
 
     navigateTo(key) {
         this.currentPath = Navigation.navigateTo(this.currentPath, key);
-        Rendering.renderCards(this.jsonData, this.currentPath, this.searchTerm);
+        // Get current search results for rendering
+        const searchResults = Search.searchTerm ? Search.searchInData(this.jsonData, [], Search.searchTerm) : null;
+        Rendering.renderCards(this.jsonData, this.currentPath, this.searchTerm, searchResults);
+
+        // Update tree view selection
+        if (document.getElementById('treeSidebar').style.display !== 'none') {
+            TreeView.updateSelection();
+        }
     }
 
     navigateBack(index) {
         this.currentPath = Navigation.navigateBack(this.currentPath, index);
-        Rendering.renderCards(this.jsonData, this.currentPath, this.searchTerm);
+        // Get current search results for rendering
+        const searchResults = Search.searchTerm ? Search.searchInData(this.jsonData, [], Search.searchTerm) : null;
+        Rendering.renderCards(this.jsonData, this.currentPath, this.searchTerm, searchResults);
+
+        // Update tree view selection
+        if (document.getElementById('treeSidebar').style.display !== 'none') {
+            TreeView.updateSelection();
+        }
     }
 
     editValue(key) {

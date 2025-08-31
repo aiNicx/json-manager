@@ -80,7 +80,16 @@ class Modals {
             currentData[currentEdit.key] = newValue;
 
             this.closeModal();
-            Rendering.renderCards(window.jsonManager.jsonData, window.jsonManager.currentPath, window.jsonManager.searchTerm);
+
+            // Get current search results for rendering
+            const searchResults = Search.searchTerm ? Search.searchInData(window.jsonManager.jsonData, [], Search.searchTerm) : null;
+            Rendering.renderCards(window.jsonManager.jsonData, window.jsonManager.currentPath, window.jsonManager.searchTerm, searchResults);
+
+            // Update tree view if visible
+            if (document.getElementById('treeSidebar').style.display !== 'none') {
+                TreeView.renderTree(window.jsonManager.jsonData, searchResults);
+            }
+
             Stats.updateStats(window.jsonManager.jsonData);
             Notifications.showSuccess('Valore modificato con successo!');
 
@@ -203,7 +212,16 @@ class Modals {
             currentData[key] = newValue;
 
             this.closeAddModal();
-            Rendering.renderCards(window.jsonManager.jsonData, window.jsonManager.currentPath, window.jsonManager.searchTerm);
+
+            // Get current search results for rendering
+            const searchResults = Search.searchTerm ? Search.searchInData(window.jsonManager.jsonData, [], Search.searchTerm) : null;
+            Rendering.renderCards(window.jsonManager.jsonData, window.jsonManager.currentPath, window.jsonManager.searchTerm, searchResults);
+
+            // Update tree view if visible
+            if (document.getElementById('treeSidebar').style.display !== 'none') {
+                TreeView.renderTree(window.jsonManager.jsonData, searchResults);
+            }
+
             Stats.updateStats(window.jsonManager.jsonData);
             Notifications.showSuccess('Elemento aggiunto con successo!');
 
@@ -223,7 +241,15 @@ class Modals {
         const currentData = Navigation.getCurrentData(window.jsonManager.jsonData, window.jsonManager.currentPath);
         delete currentData[key];
 
-        Rendering.renderCards(window.jsonManager.jsonData, window.jsonManager.currentPath, window.jsonManager.searchTerm);
+        // Get current search results for rendering
+        const searchResults = Search.searchTerm ? Search.searchInData(window.jsonManager.jsonData, [], Search.searchTerm) : null;
+        Rendering.renderCards(window.jsonManager.jsonData, window.jsonManager.currentPath, window.jsonManager.searchTerm, searchResults);
+
+        // Update tree view if visible
+        if (document.getElementById('treeSidebar').style.display !== 'none') {
+            TreeView.renderTree(window.jsonManager.jsonData, searchResults);
+        }
+
         Stats.updateStats(window.jsonManager.jsonData);
         Notifications.showSuccess('Elemento eliminato con successo!');
     }
