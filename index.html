@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JSON Manager - Gestione Configurazioni</title>
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/header.css">
+    <link rel="stylesheet" href="css/cards.css">
+    <link rel="stylesheet" href="css/modals.css">
+    <link rel="stylesheet" href="css/footer.css">
+    <link rel="stylesheet" href="css/utilities.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <h1><i class="fas fa-database"></i> JSON Manager</h1>
+                <div class="header-actions">
+                    <button id="loadFileBtn" class="btn btn-secondary">
+                        <i class="fas fa-upload"></i> Carica File
+                    </button>
+                    <button id="exportBtn" class="btn btn-primary" disabled>
+                        <i class="fas fa-download"></i> Esporta
+                    </button>
+                    <button id="resetBtn" class="btn btn-danger" disabled>
+                        <i class="fas fa-trash-alt"></i> Reset
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Navigation Breadcrumb -->
+        <nav class="breadcrumb" id="breadcrumb">
+            <span class="breadcrumb-item active">Home</span>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Loading Section -->
+            <section class="loading-section" id="loadingSection">
+                <div class="upload-area">
+                    <div class="upload-options">
+                        <div class="upload-option">
+                            <i class="fas fa-file-upload"></i>
+                            <h3>Carica File JSON</h3>
+                            <p>Seleziona un file .json dal tuo computer</p>
+                            <input type="file" id="fileInput" accept=".json" style="display: none;">
+                            <button id="fileBtn" class="btn btn-outline">Scegli File</button>
+                        </div>
+                        <div class="divider">oppure</div>
+                        <div class="upload-option">
+                            <i class="fas fa-paste"></i>
+                            <h3>Incolla Testo JSON</h3>
+                            <p>Inserisci direttamente il contenuto JSON</p>
+                            <textarea id="jsonTextarea" placeholder="Incolla qui il tuo JSON..." rows="8"></textarea>
+                            <button id="pasteBtn" class="btn btn-outline">Carica da Testo</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- JSON Viewer Section -->
+            <section class="viewer-section" id="viewerSection" style="display: none;">
+                <div class="viewer-controls">
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="searchInput" placeholder="Cerca nelle categorie...">
+                    </div>
+                    <div class="view-options">
+                        <button id="expandAllBtn" class="btn btn-sm">
+                            <i class="fas fa-expand"></i> Espandi Tutto
+                        </button>
+                        <button id="collapseAllBtn" class="btn btn-sm">
+                            <i class="fas fa-compress"></i> Collassa Tutto
+                        </button>
+                    </div>
+                </div>
+
+                <div class="cards-container" id="cardsContainer">
+                    <!-- Cards will be dynamically generated here -->
+                </div>
+            </section>
+
+            <!-- Edit Modal -->
+            <div class="modal" id="editModal">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3 id="modalTitle">Modifica Valore</h3>
+                        <button class="close-btn" id="closeModalBtn">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <div class="modal-body" id="modalBody">
+                        <!-- Edit form will be dynamically generated here -->
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-secondary" id="cancelBtn">Annulla</button>
+                        <button class="btn btn-primary" id="saveBtn">Salva</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Add Element Button -->
+        <button class="add-element-btn" id="addElementBtn" style="display: none;">
+            <i class="fas fa-plus"></i>
+        </button>
+
+        <!-- Add Element Modal -->
+        <div class="add-modal" id="addModal">
+            <div class="add-modal-content">
+                <div class="add-modal-header">
+                    <h3>Aggiungi Nuovo Elemento</h3>
+                    <button class="close-btn" id="closeAddModalBtn">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="add-modal-body">
+                    <div class="add-type-grid">
+                        <div class="add-type-option" data-type="object">
+                            <div class="add-type-icon">
+                                <i class="fas fa-cube"></i>
+                            </div>
+                            <div>Oggetto</div>
+                        </div>
+                        <div class="add-type-option" data-type="array">
+                            <div class="add-type-icon">
+                                <i class="fas fa-list"></i>
+                            </div>
+                            <div>Array</div>
+                        </div>
+                        <div class="add-type-option" data-type="string">
+                            <div class="add-type-icon">
+                                <i class="fas fa-quote-right"></i>
+                            </div>
+                            <div>Stringa</div>
+                        </div>
+                        <div class="add-type-option" data-type="number">
+                            <div class="add-type-icon">
+                                <i class="fas fa-hashtag"></i>
+                            </div>
+                            <div>Numero</div>
+                        </div>
+                        <div class="add-type-option" data-type="boolean">
+                            <div class="add-type-icon">
+                                <i class="fas fa-toggle-on"></i>
+                            </div>
+                            <div>Booleano</div>
+                        </div>
+                        <div class="add-type-option" data-type="null">
+                            <div class="add-type-icon">
+                                <i class="fas fa-ban"></i>
+                            </div>
+                            <div>Null</div>
+                        </div>
+                    </div>
+
+                    <div class="add-form" id="addForm">
+                        <div class="form-group">
+                            <label for="newKey">Nome chiave:</label>
+                            <input type="text" id="newKey" placeholder="Inserisci il nome della chiave">
+                        </div>
+                        <div class="form-group" id="valueGroup">
+                            <!-- Value input will be generated based on type -->
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" id="cancelAddBtn">Annulla</button>
+                    <button class="btn btn-primary" id="saveAddBtn">Aggiungi</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="footer-content">
+                <p>&copy; 2025 JSON Manager - Gestione Configurazioni</p>
+                <div class="footer-stats" id="footerStats">
+                    <span id="totalKeys">0 chiavi</span>
+                    <span id="totalObjects">0 oggetti</span>
+                    <span id="totalArrays">0 array</span>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <script src="js/utils.js"></script>
+    <script src="js/notifications.js"></script>
+    <script src="js/stats.js"></script>
+    <script src="js/navigation.js"></script>
+    <script src="js/rendering.js"></script>
+    <script src="js/modals.js"></script>
+    <script src="js/core.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>
